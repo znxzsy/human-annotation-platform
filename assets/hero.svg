@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
-  <title id="title">人工标注平台</title>
+  <title id="title">AlignLedger</title>
   <desc id="desc">面向强化学习与大模型训练的数据标注平台</desc>
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#173e5f"/><stop offset="1" stop-color="#315d88"/></linearGradient>
@@ -10,8 +10,8 @@
   <circle cx="1080" cy="70" r="170" fill="#f4bd60" opacity=".16"/><circle cx="75" cy="470" r="140" fill="#79b99f" opacity=".16"/>
   <g transform="translate(70 82)">
     <rect width="86" height="30" rx="15" fill="#e9b65e"/><text x="43" y="21" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="800" fill="#173e5f">HUMAN × AI</text>
-    <text y="96" font-family="system-ui" font-size="58" font-weight="900" fill="white">人工标注平台</text>
-    <text y="145" font-family="system-ui" font-size="24" fill="#dce9f2">为强化学习和大模型训练整理可靠的人类反馈数据</text>
+    <text y="96" font-family="system-ui" font-size="58" font-weight="900" fill="white">AlignLedger</text>
+    <text y="145" font-family="system-ui" font-size="24" fill="#dce9f2">可追溯的人类反馈与模型对齐数据平台</text>
     <text y="191" font-family="system-ui" font-size="18" fill="#bcd0df">逐条标注 · 二次复核 · 实名追踪 · 质量看板 · 可审计导出</text>
     <g transform="translate(0 235)">
       <rect width="134" height="45" rx="12" fill="#fffdfa"/><text x="67" y="29" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="800" fill="#234d6f">一键跑 Demo</text>

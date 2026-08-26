@@ -3,14 +3,14 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "human-annotation-platform"
+name = "alignledger"
 version = "0.1.0"
-description = "A durable five-SLOT human annotation, recheck and quality dashboard platform."
+description = "An auditable human-feedback annotation and quality platform for model alignment."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [{name = "znxzsy"}]
-keywords = ["annotation", "human-in-the-loop", "multimodal", "quality-control", "sqlite"]
+keywords = ["annotation", "human-feedback", "model-alignment", "rlhf", "quality-control"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",

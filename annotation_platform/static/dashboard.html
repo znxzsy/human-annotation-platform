@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>5-SLOT 人工标注质量看板</title>
+  <title>AlignLedger 质量看板</title>
   <style>
     :root{--bg:#f3f0e9;--paper:#fffdfa;--ink:#20231f;--muted:#74776f;--line:#ddd7cb;--blue:#315d88;--green:#18704f;--red:#b74432;--amber:#bd6c18}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
@@ -18,7 +18,7 @@
 <body>
 <main class="wrap">
   <section class="hero">
-    <div><h1>5-SLOT 人工标注质量看板</h1><p id="subtitle">模型数据、人工标注与二次复核分开统计 · 每 30 秒自动刷新</p></div>
+    <div><h1>AlignLedger 质量看板</h1><p id="subtitle">模型数据、人工标注与二次复核分开统计 · 每 30 秒自动刷新</p></div>
     <nav class="nav"><span class="session-user">标注员 <b id="reviewer-name">正在验证…</b></span><button id="logout" type="button">退出</button><a href="review.html">返回标注入口</a><a class="ranking" href="leaderboard.html">🏆 标注榜单</a><a class="danger" href="review.html?kind=badcase&batch=1">Badcase 二次复核 →</a><a class="primary" href="review.html?kind=wrong">错误专项复标 →</a><a class="good" href="review.html?kind=goodcase&batch=1">Goodcase 二次复核 →</a><a href="review.html?kind=unknown&batch=1">Unknown 二次复核 →</a></nav>
   </section>
   <section id="cards" class="cards"></section>

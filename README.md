@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/hero.svg" alt="人工标注平台：面向强化学习与大模型训练的数据标注平台" width="100%">
+  <img src="assets/hero.svg" alt="AlignLedger：面向强化学习与大模型训练的人类反馈数据平台" width="100%">
 
   <br>
 
@@ -11,7 +11,7 @@
 
 做强化学习、大模型微调或模型评测时，难点通常出在多人协作：几十个人要按同一套规则标注和复核，每条数据还得说清楚由谁处理、改过几次、最后为什么被采用。
 
-**人工标注平台**是一套开源的多人数据标注与质量管理工具。图片、模型输出、人工修正和复核结果都能放进同一个项目里处理，适合构建 RLHF、人类反馈、SFT、DPO、KTO 和模型评测数据。平台支持自动保存、冲突保护、实名邀请码、二次复核、质量榜单和可审计导出。
+**AlignLedger** 是一套开源的多人数据标注与质量管理工具。图片、模型输出、人工修正和复核结果都能放进同一个项目里处理，适合构建 RLHF、人类反馈、SFT、DPO、KTO 和模型评测数据。平台支持自动保存、冲突保护、实名邀请码、二次复核、质量榜单和可审计导出。
 
 不需要前端工程环境。Python 标准库加 SQLite，一条命令就能跑起来；先用演示数据试手感，再接入自己的数据。
 
@@ -22,8 +22,8 @@
 ## 先跑起来
 
 ```bash
-git clone https://github.com/znxzsy/human-annotation-platform.git
-cd human-annotation-platform
+git clone https://github.com/znxzsy/AlignLedger.git
+cd AlignLedger
 ./scripts/run_demo.sh
 ```
 
