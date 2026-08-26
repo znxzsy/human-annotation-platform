@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>5-SLOT 人工标注工作台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1 id="title">5-SLOT 人工标注工作台</h1>
+    <div class="sub" id="subtitle">逐题判断模型结果是否正确；错误时可填写人工修正。已完成组允许返回修改。快捷键：1=正确，2=错误，4=无手写，5=无法判断，←/→切组。</div>
+    <div class="bar">
+      <a href="./" style="padding:9px 12px;border:1px solid #ddd7cb;border-radius:8px;background:white;color:#315d88;text-decoration:none;font-weight:700">← 返回总览</a>
+      <span class="metric" id="progress">正在读取数据…</span>
+      <span class="metric sync pending" id="sync-status">正在连接服务器…</span>
+      <select id="filter" aria-label="筛选状态">
+        <option value="">全部</option>
+        <option value="unreviewed" selected>未标注</option>
+        <option value="partial">部分未标（1–4 SLOT）</option>
+        <option value="in_progress">我的进行中</option>
+        <option value="submitted">已完成</option>
+      </select>
+      <input id="group-jump" type="number" min="1" step="1" inputmode="numeric" placeholder="组号" aria-label="跳转到组">
+      <button id="jump">跳转</button><button class="primary" id="random-recheck" hidden>随机复核</button><button id="prev">上一组</button><button id="next">下一组</button>
+      <button class="primary" id="all-correct">本组全部正确</button><button id="save-now">立即保存</button>
+      <span class="reviewer">标注员 <b id="reviewer-name">正在验证…</b><button id="logout" type="button">退出</button></span>
+    </div>
+  </header>
+  <main id="app"><div class="empty">正在加载第一组…</div></main>
+  <script src="app.js?v=1"></script>
+</body>
+</html>

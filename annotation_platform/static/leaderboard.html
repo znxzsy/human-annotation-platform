@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>人工标注与复核榜单</title>
+  <style>
+    :root{--bg:#f3f0e9;--paper:#fffdfa;--ink:#20231f;--muted:#74776f;--line:#ddd7cb;--blue:#315d88;--green:#18704f;--red:#b74432;--amber:#bd6c18}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}.wrap{max-width:1480px;margin:auto;padding:30px 26px 70px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.hero h1{font-size:38px;margin:0 0 10px}.hero p{margin:0;color:var(--muted)}.nav{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.nav a,.nav button,.user{border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:10px 14px;text-decoration:none;color:var(--blue);font:inherit;font-weight:800}.nav button{cursor:pointer}.user{color:var(--muted)}.user b{color:var(--ink)}.cards{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px;margin:24px 0}.card,.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px}.card{padding:16px}.card span{color:var(--muted)}.card b{display:block;font-size:28px;margin-top:7px}.panel{padding:18px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.panel-title h2{font-size:24px;margin:0 0 7px}.panel-title p{margin:0;color:var(--muted)}.controls,.sorter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.controls button,.sorter button,.controls input{border:1px solid var(--line);background:white;border-radius:8px;padding:8px 12px;font:inherit;font-weight:800;cursor:pointer}.controls input{cursor:text}.controls button.active,.sorter button.active{background:var(--blue);border-color:var(--blue);color:white}.explain{background:#eef3f8;border-left:4px solid var(--blue);padding:11px 13px;border-radius:7px;color:#4d5f70;margin:14px 0}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 11px;border-bottom:1px solid var(--line)}th{font-size:13px;color:var(--muted);white-space:nowrap}.rank{font-size:20px;font-weight:900;color:var(--blue)}.name{font-weight:900;white-space:nowrap}.identity{display:inline-block;margin-left:7px;padding:2px 7px;border-radius:99px;background:#e5f6ec;color:var(--green);font-size:11px}.identity.legacy{background:#eeeae2;color:var(--muted)}.rate,.volume{font-size:18px;font-weight:900;color:var(--green)}.bad{color:var(--red);font-weight:800}.muted{color:var(--muted)}.empty{text-align:center;padding:42px;color:var(--muted)}.updated{color:var(--muted);font-size:13px;margin:10px 2px 0}.hidden-count{color:var(--amber);font-weight:800}
+    @media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}@media(max-width:850px){.hero{display:block}.nav{justify-content:flex-start;margin-top:16px}.panel-head{display:block}.controls,.sorter{justify-content:flex-start;margin-top:12px}}@media(max-width:520px){.wrap{padding:18px 10px}.hero h1{font-size:29px}.cards{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div><h1>标注与复核榜单</h1><p>区分标注产量、标注准确率与复核人员每日完成量</p></div>
+    <nav class="nav"><span class="user">标注员 <b id="reviewer">正在验证…</b></span><button id="logout">退出</button><a href="dashboard.html">返回总览</a><a href="review.html?kind=badcase&batch=1">进入二次复核</a></nav>
+  </section>
+
+  <section class="cards">
+    <div class="card"><span>实名标注员</span><b id="annotators">—</b></div>
+    <div class="card"><span>累计唯一复核 SLOT</span><b id="reviewed">—</b></div>
+    <div class="card"><span>累计原标准确</span><b id="accurate">—</b></div>
+    <div class="card"><span>累计发现不准</span><b id="inaccurate">—</b></div>
+    <div class="card"><span>当日唯一复核 SLOT</span><b id="daily-unique">—</b></div>
+    <div class="card"><span>当日复核人次 SLOT</span><b id="daily-person">—</b></div>
+    <div class="card"><span>跨人员重复 SLOT</span><b id="daily-duplicates">—</b></div>
+    <div class="card"><span>当日复核人员</span><b id="daily-reviewers">—</b></div>
+  </section>
+
+  <section class="panel" id="daily-panel">
+    <div class="panel-head">
+      <div class="panel-title"><h2>每日复核完成量</h2><p>按北京时间统计；唯一量用于和主界面对账，人次量用于统计个人工作量</p></div>
+      <div class="controls">
+        <button id="date-prev" title="前一天">前一天</button>
+        <input id="review-date" type="date" aria-label="复核日期">
+        <button id="date-next" title="后一天">后一天</button>
+        <button id="date-today">今天</button>
+        <button class="active" data-daily-min="100">仅看 ≥100</button>
+        <button data-daily-min="0">显示全部</button>
+      </div>
+    </div>
+    <p class="explain"><span id="daily-reconcile">正在核对唯一复核 SLOT…</span><br>人员表按“复核人次 SLOT”统计：同一人重复修改同一 SLOT 只计一次；不同人员复核同一 SLOT 分别计入个人工作量，但唯一总量只计一次。<span id="daily-filter-note" class="hidden-count"></span></p>
+    <div class="table-wrap"><table><thead><tr><th>排名</th><th>复核人</th><th>复核人次 SLOT</th><th>涉及组数</th><th>判原标准确</th><th>发现不准</th><th>Good / Bad / Unknown</th></tr></thead><tbody id="daily-rows"><tr><td colspan="7" class="empty">正在加载每日复核量…</td></tr></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title"><h2>标注准确率</h2><p>统计某人的标注后来被复核了多少以及是否准确</p></div>
+      <div class="sorter" id="annotation-sorter">
+        <button class="active" data-sort="accuracy">按准确率</button><button data-sort="volume">按标注量</button>
+        <button class="active" data-min-annotated="200">已标 SLOT ≥200</button><button data-min-annotated="0">显示全部</button>
+      </div>
+    </div>
+    <p class="explain">准确率 = 二次复核判定“人工原标准确”的 SLOT ÷ 该标注员已被复核的 SLOT。默认隐藏已标 SLOT 少于 200 的人员；复核样本量只用于计算准确率，不参与过滤。<span id="annotation-filter-note" class="hidden-count"></span></p>
+    <div class="table-wrap"><table><thead><tr><th>排名</th><th>标注人</th><th>已标 SLOT</th><th>已标组数</th><th>复核样本</th><th>原标准确</th><th>发现不准</th><th>准确率</th><th>Good / Bad / Unknown</th></tr></thead><tbody id="rows"><tr><td colspan="9" class="empty">正在加载榜单…</td></tr></tbody></table></div>
+    <div id="updated" class="updated"></div>
+  </section>
+</main>
+<script defer src="leaderboard.js?v=1"></script>
+</body>
+</html>

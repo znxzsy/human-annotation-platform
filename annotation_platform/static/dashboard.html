@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>5-SLOT 人工标注质量看板</title>
+  <style>
+    :root{--bg:#f3f0e9;--paper:#fffdfa;--ink:#20231f;--muted:#74776f;--line:#ddd7cb;--blue:#315d88;--green:#18704f;--red:#b74432;--amber:#bd6c18}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+    .wrap{max-width:1880px;margin:auto;padding:30px 28px 70px}.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px}.hero h1{font-size:42px;line-height:1.1;margin:0 0 14px;letter-spacing:-1px}.hero p{margin:0;color:var(--muted);font-size:17px}.nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}.nav a,.nav button,.session-user{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:12px 16px;color:var(--blue);font:inherit;font-weight:800;text-decoration:none;white-space:nowrap}.nav button{cursor:pointer}.session-user{color:var(--muted)}.session-user b{color:var(--ink)}.nav a.primary{background:var(--blue);border-color:var(--blue);color:white}.nav a.ranking{background:#fff2d9;border-color:#e3b66d;color:#8a4b00}.nav a.good{color:var(--green)}.nav a.danger{color:var(--red)}
+    .cards{display:grid;grid-template-columns:repeat(7,minmax(165px,1fr));gap:14px;margin-bottom:16px}.card,.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px}.card{padding:20px 18px}.card .label{color:var(--muted);font-size:15px}.card strong{display:block;font-size:34px;margin:10px 0 8px}.card .percent{font-size:15px}.bar{height:9px;background:#e4e0d7;border-radius:99px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--blue)}.bar.green i{background:var(--green)}.bar.red i{background:var(--red)}.bar.amber i{background:var(--amber)}
+    .panel{padding:18px;margin-top:16px;overflow:hidden}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:10px}.panel-head h2{font-size:19px;margin:0}.panel-head .note{color:var(--muted);text-align:right}.definition{margin:0 0 12px;padding:10px 12px;border-left:4px solid var(--blue);background:#eef3f8;color:#4d5f70;border-radius:6px}
+    table{width:100%;border-collapse:collapse}th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}th{color:var(--muted);font-size:13px;white-space:nowrap}td b{font-size:15px}.type-name strong{display:block;font-size:17px}.type-name span{color:var(--muted)}.cell-progress{min-width:180px}.cell-line{display:flex;justify-content:space-between;gap:8px}.mini{height:8px;background:#e4e0d7;border-radius:99px;overflow:hidden;margin-top:8px}.mini i{display:block;height:100%;background:var(--blue)}.mini.green i{background:var(--green)}.mini.amber i{background:var(--amber)}.pill{display:inline-block;border-radius:999px;padding:3px 9px;font-weight:800}.pill.right{background:#e5f6ec;color:var(--green)}.pill.wrong{background:#fbe9e6;color:var(--red)}.pill.unknown{background:#fff2d9;color:var(--amber)}
+    .batch-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.batch-controls select,.batch-controls button,.batch-controls input{font:inherit;border:1px solid var(--line);border-radius:8px;background:white;padding:8px 11px}.batch-controls input{width:86px}.batch-controls button{cursor:pointer}.batch-table{max-height:640px;overflow:auto}.batch-table th{position:sticky;top:0;background:var(--paper);z-index:1}.entry{color:var(--blue);font-weight:800;text-decoration:none}.muted{color:var(--muted)}.goodtext{color:var(--green);font-weight:800}.badtext{color:var(--red);font-weight:800}.refresh-time{font-size:13px;color:var(--muted)}.error{color:var(--red);font-weight:800}.ops{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:-2px 0 16px;padding:11px 14px;background:#ebe7de;border:1px solid var(--line);border-radius:11px}.ops .op{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--muted)}.ops .op b{color:var(--ink);margin-left:5px}.ops .healthy{color:var(--green);font-weight:800}.ops .warn{color:var(--amber);font-weight:800}
+    @media(max-width:1450px){.cards{grid-template-columns:repeat(3,1fr)}}@media(max-width:1150px){.hero{display:block}.nav{justify-content:flex-start;margin-top:18px}.panel{overflow:auto}}@media(max-width:650px){.wrap{padding:18px 12px}.hero h1{font-size:30px}.cards{grid-template-columns:1fr}.nav a{width:100%}.panel-head{display:block}.panel-head .note{text-align:left;margin-top:6px}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div><h1>5-SLOT 人工标注质量看板</h1><p id="subtitle">模型数据、人工标注与二次复核分开统计 · 每 30 秒自动刷新</p></div>
+    <nav class="nav"><span class="session-user">标注员 <b id="reviewer-name">正在验证…</b></span><button id="logout" type="button">退出</button><a href="review.html">返回标注入口</a><a class="ranking" href="leaderboard.html">🏆 标注榜单</a><a class="danger" href="review.html?kind=badcase&batch=1">Badcase 二次复核 →</a><a class="primary" href="review.html?kind=wrong">错误专项复标 →</a><a class="good" href="review.html?kind=goodcase&batch=1">Goodcase 二次复核 →</a><a href="review.html?kind=unknown&batch=1">Unknown 二次复核 →</a></nav>
+  </section>
+  <section id="cards" class="cards"></section>
+  <section id="ops" class="ops"></section>
+  <section class="panel">
+    <div class="panel-head"><h2>待标池构成与人工抽检结果</h2><span class="note">题型为标题 + 模型输出的自动粗分，仅用于抽样；不是人工题型标注</span></div>
+    <p class="definition">“人工已判 SLOT”只统计 verdict 非空的 SLOT；“人工完成整组”只统计五个 SLOT 都已有结论的组。“初标准确率”＝正确 ÷（正确＋错误），Unknown 不进入分母；二次复核不会覆盖首次标注。</p>
+    <table><thead><tr><th>自动粗分类</th><th>模型数据 SLOT</th><th>人工已抽检</th><th>整组已完成覆盖</th><th>right</th><th>wrong</th><th>unknown</th><th>准确率</th></tr></thead><tbody id="types"></tbody></table>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><div><h2>批次 / 组进度</h2><span id="refreshed" class="refresh-time"></span></div><div class="batch-controls"><input id="batchSearch" type="number" min="1" placeholder="批次号" aria-label="批次号"><label>范围 <select id="scope"><option value="all">全部批次</option><option value="unfinished">未完成批次</option><option value="started">已开始抽检</option><option value="completed">已完成批次</option></select></label><label>排序 <select id="sort"><option value="batch">批次顺序</option><option value="progress">完成度</option><option value="bad">Badcase 数</option></select></label><button id="refresh">立即刷新</button></div></div>
+    <div class="batch-table"><table><thead><tr><th>批次（每批 1,000 组）</th><th>模型数据</th><th>人工已抽检</th><th>整组完成</th><th>Goodcase</th><th>Badcase</th><th>wrong SLOT</th><th>unknown SLOT</th><th>准确率</th><th>已复核 SLOT</th><th>人工标注不准</th><th>复核准确率</th><th>最近标注</th><th>入口</th></tr></thead><tbody id="batches"></tbody></table></div>
+  </section>
+</main>
+<script defer src="dashboard.js?v=1"></script>
+</body>
+</html>

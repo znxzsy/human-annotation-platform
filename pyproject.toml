@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "human-annotation-platform"
+version = "0.1.0"
+description = "A durable five-SLOT human annotation, recheck and quality dashboard platform."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "znxzsy"}]
+keywords = ["annotation", "human-in-the-loop", "multimodal", "quality-control", "sqlite"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[tool.setuptools]
+packages = ["annotation_platform"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+annotation_platform = ["schema.sql", "static/*", "static/demo/*"]

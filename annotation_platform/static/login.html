@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>人工标注平台登录</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card">
+      <div class="login-badge">HUMAN · 5-SLOT</div>
+      <h1>邀请码登录</h1>
+      <p>首次登录时，邀请码会与填写的姓名永久绑定。之后请使用同一邀请码和同一姓名登录。</p>
+      <form id="login-form" autocomplete="off">
+        <label>姓名<input id="display-name" name="display_name" minlength="2" maxlength="24" required autocomplete="name" placeholder="请填写本人姓名"></label>
+        <label>邀请码<input id="invite-code" name="invite_code" required autocapitalize="characters" spellcheck="false" placeholder="ORI-XXXX-XXXX-XXXX-XXXX"></label>
+        <button class="primary" type="submit" id="login-button">进入标注平台</button>
+      </form>
+      <div id="login-message" class="login-message" role="alert"></div>
+      <p class="login-note">一个姓名只能绑定一个普通邀请码；绑定后不能改名。管理员入口使用部署时预设的姓名。</p>
+    </section>
+  </main>
+  <script src="login.js?v=1"></script>
+</body>
+</html>
