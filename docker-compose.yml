@@ -1,0 +1,10 @@
+services:
+  annotation-platform:
+    build: .
+    ports:
+      - "18068:18068"
+    volumes:
+      - ./runtime:/data
+    environment:
+      ANNOTATION_AUTH_REQUIRED: "0"
+      ANNOTATION_DEMO_REVIEWER: "演示标注员"

@@ -1,0 +1,30 @@
+# Runtime data — never commit real annotations or identities.
+runtime/
+exports/
+secrets/
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.jsonl
+*.jsonl.gz
+audit*
+
+# Credentials and local configuration.
+.env
+*.pem
+*.key
+*.crt
+
+# Python, editors and operating systems.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.DS_Store
+.idea/
+.vscode/
+
+# Generated screenshots before they are reviewed and copied into assets.
+artifacts/
