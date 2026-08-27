@@ -1,3 +1,5 @@
+<p align="right"><strong>English</strong> · <a href="SECURITY_ZH.md">中文</a></p>
+
 # Security
 
 ## Reporting a vulnerability

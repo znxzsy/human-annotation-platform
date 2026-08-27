@@ -37,8 +37,8 @@ def worksheet_svg(group_number: int) -> str:
         )
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1120" viewBox="0 0 900 1120">
 <rect width="900" height="1120" fill="#e9e5dc"/>
-<text x="70" y="62" font-family="system-ui" font-size="28" font-weight="800" fill="#20231f">五题练习 · 演示组 {group_number:02}</text>
-<text x="70" y="92" font-family="system-ui" font-size="16" fill="#74776f">全部内容均为程序生成，不含真实学生数据</text>
+<text x="70" y="62" font-family="system-ui" font-size="28" font-weight="800" fill="#20231f">FIVE-ITEM WORKSHEET · DEMO {group_number:02}</text>
+<text x="70" y="92" font-family="system-ui" font-size="16" fill="#74776f">Synthetic fixture only · no real annotation or student data</text>
 {''.join(cards)}
 </svg>'''
 
