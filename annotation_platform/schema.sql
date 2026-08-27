@@ -49,6 +49,13 @@ CREATE TABLE IF NOT EXISTS slot_rechecks (
   pool TEXT NOT NULL CHECK(pool IN ('goodcase','badcase','unknown')),
   note TEXT, reviewed_by TEXT NOT NULL, reviewed_at TEXT NOT NULL,
   original_by TEXT,
+  final_verdict TEXT CHECK(final_verdict IN ('correct','wrong','unsure')),
+  final_r TEXT,
+  final_h INTEGER CHECK(final_h IN (0,1)),
+  final_reason_code TEXT CHECK(final_reason_code IN (
+    'math_error','visual_misread','slot_alignment','format_error',
+    'image_blurred','ungradable','no_handwriting','other'
+  )),
   PRIMARY KEY(event_id,slot)
 );
 CREATE INDEX IF NOT EXISTS idx_slot_rechecks_pool_verdict ON slot_rechecks(pool,verdict);

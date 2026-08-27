@@ -36,23 +36,40 @@ def export_snapshot(db_path: Path, output_root: Path) -> Path:
             if recheck:
                 files["group_rechecks.jsonl"].write(json.dumps(dict(recheck), ensure_ascii=False) + "\n")
                 counts["recheck_" + recheck["verdict"]] += 1
-            for slot_recheck in con.execute(
-                "SELECT * FROM slot_rechecks WHERE event_id=? ORDER BY slot", (g["event_id"],)
-            ):
-                files["slot_rechecks.jsonl"].write(json.dumps(dict(slot_recheck), ensure_ascii=False) + "\n")
+            slot_rechecks = {
+                row["slot"]: dict(row) for row in con.execute(
+                    "SELECT * FROM slot_rechecks WHERE event_id=? ORDER BY slot", (g["event_id"],)
+                )
+            }
+            for slot_recheck in slot_rechecks.values():
+                files["slot_rechecks.jsonl"].write(json.dumps(slot_recheck, ensure_ascii=False) + "\n")
                 counts["slot_recheck_" + slot_recheck["verdict"]] += 1
             final_items, complete = [], len(slots) == 5 and len(parsed) == 5
             for pos, slot in enumerate(slots):
                 files["slot_reviews.jsonl"].write(json.dumps(slot, ensure_ascii=False) + "\n")
                 counts[slot["verdict"]] += 1
-                if slot["verdict"] in ("correct", "wrong"):
-                    kto = {"event_id": g["event_id"], "page_id": g["page_id"], "request_id": g["request_id"], "slot": slot["slot"], "image": g["image_ref"], "label": slot["verdict"], "model_item": parsed[pos]}
+                effective = dict(slot)
+                checked = slot_rechecks.get(slot["slot"])
+                if checked and checked["verdict"] == "inaccurate":
+                    if not checked.get("final_verdict"):
+                        complete = False
+                        counts["quarantined_inaccurate"] += 1
+                        continue
+                    effective.update({
+                        "verdict": checked["final_verdict"],
+                        "revised_r": checked.get("final_r"),
+                        "revised_h": checked.get("final_h"),
+                        "reason_code": checked.get("final_reason_code"),
+                    })
+                    counts["resolved_inaccurate"] += 1
+                if effective["verdict"] in ("correct", "wrong"):
+                    kto = {"event_id": g["event_id"], "page_id": g["page_id"], "request_id": g["request_id"], "slot": slot["slot"], "image": g["image_ref"], "label": effective["verdict"], "model_item": parsed[pos]}
                     files["kto_candidates.jsonl"].write(json.dumps(kto, ensure_ascii=False) + "\n")
-                if slot["verdict"] == "wrong" and slot["revised_r"] is not None:
-                    dpo = {"event_id": g["event_id"], "slot": slot["slot"], "image": g["image_ref"], "rejected": parsed[pos], "chosen": {"r": slot["revised_r"], "h": slot["revised_h"]}}
+                if effective["verdict"] == "wrong" and effective["revised_r"] is not None:
+                    dpo = {"event_id": g["event_id"], "slot": slot["slot"], "image": g["image_ref"], "rejected": parsed[pos], "chosen": {"r": effective["revised_r"], "h": effective["revised_h"]}}
                     files["dpo_candidates.jsonl"].write(json.dumps(dpo, ensure_ascii=False) + "\n")
-                if slot["verdict"] == "correct": final_items.append(parsed[pos])
-                elif slot["verdict"] == "wrong" and slot["revised_r"] is not None: final_items.append({"r": slot["revised_r"], "h": slot["revised_h"]})
+                if effective["verdict"] == "correct": final_items.append(parsed[pos])
+                elif effective["verdict"] == "wrong" and effective["revised_r"] is not None: final_items.append({"r": effective["revised_r"], "h": effective["revised_h"]})
                 else: complete = False
             if complete and len(final_items) == 5:
                 files["sft_complete_groups.jsonl"].write(json.dumps({"event_id": g["event_id"], "image": g["image_ref"], "output": final_items}, ensure_ascii=False) + "\n")

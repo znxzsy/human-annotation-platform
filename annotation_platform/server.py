@@ -119,7 +119,7 @@ def make_handler(
             parsed = urlparse(self.path)
             path = unquote(parsed.path)
             if path == "/api/health":
-                return self.json_response({"ok": True, "schema": 8, **summary_cache.get()})
+                return self.json_response({"ok": True, "schema": 9, **summary_cache.get()})
             if path == "/api/session":
                 if not auth_required:
                     return self.json_response({
@@ -161,6 +161,7 @@ def make_handler(
                         random_pick=mode == "random",
                         start=(q.get("start") or [1])[0],
                         end=(q.get("end") or [2147483647])[0],
+                        pending_only=(q.get("pending") or ["0"])[0] == "1",
                     )
                     return self.json_response(
                         item or {"error": "该组不在当前复核池，或复核池暂无数据"},
@@ -282,6 +283,8 @@ def make_handler(
                     return self.json_response(store.save_recheck(
                         event_id, body.get("slot"), actor, body["idempotency_key"],
                         body.get("verdict"), body.get("note", ""), body.get("pool", ""),
+                        body.get("final_verdict"), body.get("final_r"), body.get("final_h"),
+                        body.get("final_reason_code"),
                     ))
                 if path == "/api/exports":
                     target = export_snapshot(store.db_path, export_root)

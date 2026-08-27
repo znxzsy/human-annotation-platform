@@ -61,6 +61,9 @@ class SmokeTest(unittest.TestCase):
                 self.assertEqual(json.load(urlopen(base + "/api/summary"))["total"], 12)
                 self.assertIn("人工标注", urlopen(base + "/").read().decode("utf-8"))
                 self.assertIn("部分未标", urlopen(base + "/review.html").read().decode("utf-8"))
+                app_js = urlopen(base + "/app.js").read().decode("utf-8")
+                self.assertIn("请给出最终标签", app_js)
+                self.assertIn("正在自动跳转下一条", app_js)
                 self.assertIn(b"<svg", urlopen(base + "/demo/group-01.svg").read(200))
                 with self.assertRaises(HTTPError) as blocked:
                     urlopen(base + "/%2e%2e/README.md")

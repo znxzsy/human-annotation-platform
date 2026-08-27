@@ -37,6 +37,7 @@ class Store:
             self._migrate_group_rechecks_to_slots(con)
             self._migrate_recheck_original_annotator(con)
             self._migrate_recheck_unknown_pool(con)
+            self._migrate_recheck_final_labels(con)
             self._backfill_source_slot_types(con)
             # The daily leaderboard only scans the selected Beijing day.  Keep
             # that lookup off the annotation write path and out of a full audit
@@ -45,7 +46,7 @@ class Store:
                 "CREATE INDEX IF NOT EXISTS idx_review_events_action_created_at "
                 "ON review_events(action, created_at)"
             )
-            con.execute("INSERT OR REPLACE INTO metadata VALUES('schema_version','8')")
+            con.execute("INSERT OR REPLACE INTO metadata VALUES('schema_version','9')")
 
     @staticmethod
     def _classify_question_type(text):
@@ -185,6 +186,19 @@ class Store:
             WHEN EXISTS(SELECT 1 FROM slot_reviews r WHERE r.event_id=slot_rechecks.event_id
                 AND r.slot=slot_rechecks.slot AND r.verdict='correct') THEN 'goodcase'
             ELSE pool END""")
+
+    @staticmethod
+    def _migrate_recheck_final_labels(con):
+        columns = {row[1] for row in con.execute("PRAGMA table_info(slot_rechecks)")}
+        additions = {
+            "final_verdict": "TEXT CHECK(final_verdict IN ('correct','wrong','unsure'))",
+            "final_r": "TEXT",
+            "final_h": "INTEGER CHECK(final_h IN (0,1))",
+            "final_reason_code": "TEXT CHECK(final_reason_code IN ('math_error','visual_misread','slot_alignment','format_error','image_blurred','ungradable','no_handwriting','other'))",
+        }
+        for name, declaration in additions.items():
+            if name not in columns:
+                con.execute(f"ALTER TABLE slot_rechecks ADD COLUMN {name} {declaration}")
 
     def connect(self):
         con = sqlite3.connect(str(self.db_path), timeout=30)
@@ -662,7 +676,7 @@ class Store:
         return self.item(row["event_id"]) if row else None
 
     def recheck_pick(self, pool: str, ordinal=None, random_pick=False,
-                     start=1, end=2147483647) -> dict | None:
+                     start=1, end=2147483647, pending_only=False) -> dict | None:
         if pool not in ("goodcase", "badcase", "unknown"):
             raise ValueError("invalid recheck pool")
         eligible = {
@@ -682,16 +696,18 @@ class Store:
                     base + " AND s.source_ordinal=? LIMIT 1", bounds + (int(ordinal),)
                 ).fetchone()
             elif random_pick:
-                # Prefer a group with at least one eligible SLOT not yet checked in this pool.
+                # Prefer a group with an eligible SLOT that is either untouched or
+                # marked inaccurate but still waiting for a final correction.
                 row = con.execute(
                     base + """ AND EXISTS(SELECT 1 FROM slot_reviews r
                               WHERE r.event_id=s.event_id AND {}
                               AND NOT EXISTS(SELECT 1 FROM slot_rechecks q
-                                  WHERE q.event_id=r.event_id AND q.slot=r.slot AND q.pool=?))
+                                  WHERE q.event_id=r.event_id AND q.slot=r.slot AND q.pool=?
+                                  AND (q.verdict='accurate' OR q.final_verdict IS NOT NULL)))
                               ORDER BY RANDOM() LIMIT 1""".format(eligible),
                     bounds + (pool,),
                 ).fetchone()
-                if not row:
+                if not row and not pending_only:
                     row = con.execute(base + " ORDER BY RANDOM() LIMIT 1", bounds).fetchone()
             else:
                 raise ValueError("recheck pick mode required")
@@ -969,7 +985,8 @@ class Store:
         self._audit(event)
         return self.item(event_id)
 
-    def save_recheck(self, event_id, slot, actor, key, verdict, note="", pool=""):
+    def save_recheck(self, event_id, slot, actor, key, verdict, note="", pool="",
+                     final_verdict=None, final_r=None, final_h=None, final_reason_code=None):
         try:
             slot = int(slot)
         except (TypeError, ValueError):
@@ -980,6 +997,27 @@ class Store:
             raise ValueError("invalid recheck verdict")
         if pool not in ("goodcase", "badcase", "unknown"):
             raise ValueError("invalid recheck pool")
+        if final_verdict not in (None, "correct", "wrong", "unsure"):
+            raise ValueError("invalid final verdict")
+        if verdict == "accurate":
+            final_verdict = final_r = final_h = final_reason_code = None
+        elif final_verdict == "correct":
+            final_r = final_h = final_reason_code = None
+        elif final_verdict == "wrong":
+            final_r = str(final_r or "").strip()
+            if not final_r:
+                raise ValueError("请填写最终修正结果")
+            final_h = 0 if final_h is None else int(final_h)
+            if final_h not in (0, 1):
+                raise ValueError("invalid final h")
+            final_reason_code = (str(final_reason_code or "").strip() or None)
+        elif final_verdict == "unsure":
+            final_reason_code = str(final_reason_code or "").strip()
+            if final_reason_code not in ("image_blurred", "no_handwriting", "ungradable"):
+                raise ValueError("请选择最终 Unknown 原因")
+            final_r, final_h = None, 1
+        else:
+            final_r = final_h = final_reason_code = None
         stamp = now()
         with self.connect() as con:
             con.execute("BEGIN IMMEDIATE")
@@ -1006,14 +1044,21 @@ class Store:
                 raise ConflictError("slot is not eligible for recheck")
             if pool != actual_pool: raise ConflictError("recheck pool changed")
             old = con.execute("SELECT * FROM slot_rechecks WHERE event_id=? AND slot=?", (event_id, slot)).fetchone()
-            con.execute("""INSERT INTO slot_rechecks(event_id,slot,verdict,pool,note,reviewed_by,reviewed_at,original_by)
-                VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(event_id,slot) DO UPDATE SET verdict=excluded.verdict,
+            con.execute("""INSERT INTO slot_rechecks(
+                    event_id,slot,verdict,pool,note,reviewed_by,reviewed_at,original_by,
+                    final_verdict,final_r,final_h,final_reason_code
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(event_id,slot) DO UPDATE SET verdict=excluded.verdict,
                 pool=excluded.pool,note=excluded.note,reviewed_by=excluded.reviewed_by,
                 reviewed_at=excluded.reviewed_at,
-                original_by=COALESCE(slot_rechecks.original_by,excluded.original_by)""",
-                (event_id, slot, verdict, pool, (note or "").strip() or None, actor, stamp, original["updated_by"]))
+                original_by=COALESCE(slot_rechecks.original_by,excluded.original_by),
+                final_verdict=excluded.final_verdict,final_r=excluded.final_r,
+                final_h=excluded.final_h,final_reason_code=excluded.final_reason_code""",
+                (event_id, slot, verdict, pool, (note or "").strip() or None, actor, stamp,
+                 original["updated_by"], final_verdict, final_r, final_h, final_reason_code))
             after = {"slot": slot, "verdict": verdict, "pool": pool,
-                     "note": (note or "").strip() or None, "original_by": original["updated_by"]}
+                     "note": (note or "").strip() or None, "original_by": original["updated_by"],
+                     "final_verdict": final_verdict, "final_r": final_r,
+                     "final_h": final_h, "final_reason_code": final_reason_code}
             event = self._record(con, event_id, "recheck_slot", actor, key, dict(old) if old else {}, after)
         self._audit(event)
         return self.item(event_id)
